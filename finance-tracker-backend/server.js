@@ -12,7 +12,7 @@ dotenv.config();
 
 const app = express();
 
-// CORS - MUST BE BEFORE ROUTES
+// CORS
 app.use(
   cors({
     origin: [
@@ -28,8 +28,16 @@ app.use(
 
 app.use(express.json());
 
-// Connect to database (non-blocking for serverless)
-connectDB().catch((err) => console.error("DB connection error:", err));
+// Middleware to ensure DB connection before handling requests
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    console.error("Database connection failed:", error);
+    res.status(500).json({ error: "Database connection failed" });
+  }
+});
 
 // Routes
 app.use("/api/auth", authRoutes);
@@ -42,15 +50,13 @@ app.get("/", (req, res) => {
   res.json({ message: "Finance Tracker API is running..." });
 });
 
-// IMPORTANT: Only listen in development, NOT production
+// Only for local development
 if (process.env.NODE_ENV !== "production") {
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => {
-    console.log(
-      `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`
-    );
+    console.log(`Server running on port ${PORT}`);
   });
 }
 
-// CRITICAL FOR VERCEL: Export the app
+// Export for Vercel
 module.exports = app;
