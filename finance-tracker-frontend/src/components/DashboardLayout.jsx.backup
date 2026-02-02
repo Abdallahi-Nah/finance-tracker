@@ -1,0 +1,51 @@
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import Sidebar from "./Sidebar";
+import { Menu } from "lucide-react";
+
+const DashboardLayout = ({ children }) => {
+  const { i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
+
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const closeSidebar = () => {
+    setIsSidebarOpen(false);
+  };
+
+  return (
+    <div className="flex min-h-screen bg-gray-50">
+      {/* Sidebar */}
+      <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
+
+      {/* Main Content */}
+      <div className={`flex-1 ${isRTL ? "mr-64" : "ml-64"}`}>
+        {/* Header للموبايل فقط - يحتوي على زر القائمة */}
+        <div className="lg:hidden bg-white shadow-sm sticky top-0 z-30">
+          <div className="flex items-center justify-between p-4">
+            <button
+              onClick={toggleSidebar}
+              className="text-gray-600 hover:text-gray-800 transition-colors"
+              aria-label="Open menu"
+            >
+              <Menu size={24} />
+            </button>
+
+            <h2 className="text-lg font-semibold text-gray-800">FinSet</h2>
+
+            {/* مساحة فارغة للتوازن */}
+            <div className="w-6"></div>
+          </div>
+        </div>
+
+        <div className="p-8">{children}</div>
+      </div>
+    </div>
+  );
+};
+
+export default DashboardLayout;
